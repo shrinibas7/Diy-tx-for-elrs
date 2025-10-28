@@ -189,8 +189,8 @@ void setup() {
   crsf.begin();
   
   // Add debug serial
-  Serial2.begin(416666, SERIAL_8N1, 16, 17); // RX=16, TX=17
-  Serial.println("CRSF Serial initialized on GPIO 16/17");
+  //Serial2.begin(416666, SERIAL_8N1, 16, 17); // RX=16, TX=17
+  //Serial.println("CRSF Serial initialized on GPIO 16/17");
   
   // Initialize OLED
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
