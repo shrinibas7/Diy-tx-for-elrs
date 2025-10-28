@@ -2,6 +2,8 @@
 #define CRSF_H
 
 #include <Arduino.h>
+#include <crsf_protocol.h>
+
 
 // Basic setup
 #define CRSF_MAX_CHANNEL        16
@@ -43,15 +45,58 @@
 #define TYPE_SETTINGS_WRITE             0x2D
 #define ADDR_RADIO                      0xEA
 
+
 class CRSF {
 public:
     void begin(void);
+    void update();
     void crsfPrepareDataPacket(uint8_t packet[], int16_t channels[]);
     void crsfPrepareCmdPacket(uint8_t packetCmd[], uint8_t command, uint8_t value);
     void CrsfWritePacket(uint8_t packet[], uint8_t packetLength);
+
+private:
+    uint8_t _rxBuf[CRSF_MAX_PACKET_LEN+3];
+    uint8_t _rxBufPos;
+    int _channels[CRSF_NUM_CHANNELS];
+    uint32_t _lastReceive;
+    uint32_t _lastChannelsPacket;
+    bool _linkIsUp;
+
+    uint8_t _device_address;
+    char _device_name[CRSF_MAX_NAME_LEN];
+    deviceInformationPacket_t _deviceInfo;
+
+    crsf_channels_t _channelsPacked;
+    crsf_sensor_battery_t _batterySensor;
+    crsfLinkStatistics_t _linkStatistics;
+    crsf_sensor_gps_t _gpsSensor;
+    crsf_sensor_vario_t _varioSensor;
+    crsf_sensor_baro_altitude_t _baroAltitudeSensor;
+    crsf_sensor_attitude_t _attitudeSensor;
+
+    void handleSerialIn();
+    void handleByteReceived();
+    void shiftRxBuffer(uint8_t cnt);
+    void processPacketIn(uint8_t len);
+
+    // Packet RX Handlers
+    void packetChannelsPacked(const crsf_header_t *p);
+    void packetBatterySensor(const crsf_header_t *p);
+    void packetLinkStatistics(const crsf_header_t *p);
+    void packetGps(const crsf_header_t *p);
+    void packetVario(const crsf_header_t *p);
+    void packetBaroAltitude(const crsf_header_t *p);
+    void packetAttitude(const crsf_header_t *p);
+    void packetDeviceInfo(const crsf_ext_header_t *p);
+    void packetParameterSettingsEntry(const crsf_ext_header_t *p);
+    void packetRadioId(const crsf_ext_header_t *p);
 };
+
 
 // CRC8 (poly 0xD5)
 uint8_t crc8_dvb_s2(const uint8_t *data, size_t len);
+
+void setCRSF_RX();
+void setCRSF_TX();
 
 #endif
